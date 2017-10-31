@@ -1,0 +1,25 @@
+--Problem 1
+--loading the holiday file
+val HolidaySet = sc.textFile("/user/cloudera/18.1/S18_Dataset_Holidays.txt")
+
+--Creating the tuple of the holiday tuple
+val HolidayTuple = HolidaySet.map(x => {
+val row = x.split(",").toList
+(row.apply(0).toInt,row.apply(1),row.apply(2),row.apply(3),row.apply(4).toInt,row.apply(5).toInt)
+})
+
+
+--loading the trasnport file and creating the tuple of it
+val TransportSet = sc.textFile("/user/cloudera/18.1/S18_Dataset_Transport.txt")
+val TransportTuple = TransportSet.map(x=>{
+val row = x.split(",").toList
+(row.apply(0),row.apply(1).toInt)
+})
+
+--seleceting the particular feilds of the  from the holiday file and joining them with the transport tuple
+val FilterFeilds = HolidayTuple.map(x=>x._4->(x._2,x._3,x._6))
+val MostRevenuegeneratedroute = FilterFeilds.join(TransportTuple).map(x=>x._2).groupByKey().map(x => x._1->x._2.sum).sortBy(x=> -x._2)
+
+---Problem 2
+val FilterFeilds = HolidayTuple.map(x=>x._4->(x._1,x._6))
+val AmountspentByEveryUser = FilterFeilds.join(TransportTuple).map(x=>x._2).groupByKey().map(x => x._1->x._2.sum).sortBy(x=> -x._2)
