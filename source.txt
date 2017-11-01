@@ -26,28 +26,31 @@ val AmountspentByEveryUser = FilterFeilds.join(TransportTuple).map(x=>x._2).grou
 
 
 --problem 3
-
+--load the userdata into the spark shell
 val UserDataSet = sc.textFile("/user/cloudera/18.1/S18_Dataset_User_details.txt")
+
+--creating the tupple of the user data
 val UserTuple = UserDataSet.map(x=>{
 val row = x.split(",").toList
 (row.apply(0).toInt,row.apply(1),row.apply(2).toInt)
 })
 
+--filtering the feilds req
 val HolidayFilterFeilds = HolidayTuple.map(x=>x._1->x._6)
 val UserFilterFeilds = UserTuple.map(x=> x._1->x._3)
 
-
-val joinHodiayUser = HolidayFilterFeilds.join(UserFilterFeilds)
-
+--joining the holiday with user on the basis of the id
 val joinHodiayUser = HolidayFilterFeilds.join(UserFilterFeilds).map(x=> (x._2._1,x._2._2)
 
 
 
-
+--Assigning the age group to particular user
 val AssignAgeGroup = joinHodiayUser.map(x => x._1 -> {
 if(x._2 <20) "<20"
 else if(x._2 > 35) ">35"
 else "20-35"
 })
 
-val groupByAgeGroupEveryYear = AssignAgeGroup.map(x=>((x._1._2,x._2),1)).groupBy(x=> x._1).map(x=> x._2)......
+--grouping onn the basis of year and Agegroup and the suming the occurence
+val groupByAgeGroupEveryYear = AssignAgeGroup.map(x=>((x._1._2,x._2),1)).groupByKey().map(x=> x._1->x._2.sum).sortBy(x=> -x._2)
+
